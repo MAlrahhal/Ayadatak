@@ -2,14 +2,14 @@
 
 Ayadatak is an Arabic-first, multi-tenant SaaS platform that lets clinics and doctors create and manage professional clinic websites from a single shared platform.
 
-> **Status:** Project foundation only. No product features are implemented yet.
+> **Status:** The project foundation and marketing homepage are implemented. Authentication, dashboards, tenant routing, persistence, and public clinic websites are not implemented yet.
 
 ## Planned scope
 
 - Public marketing website for Ayadatak
 - Clinic owner authentication and onboarding
 - Clinic owner dashboard (content, settings, section visibility)
-- Multiple clinic website templates
+- One polished clinic website template in V1
 - Public clinic websites on subdomains / custom domains
 - Platform admin dashboard
 
@@ -54,8 +54,8 @@ Then open http://localhost:3000.
 
 ```
 src/
-  app/          # Next.js App Router (routes, layouts, global styles)
-public/         # Static assets
+  app/          # Next.js App Router (routes, layout, global styles)
+  components/
+    marketing/  # Marketing homepage sections
+    ui/         # Shared presentational primitives
 ```
-
-Additional folders will be introduced only when a feature needs them.
