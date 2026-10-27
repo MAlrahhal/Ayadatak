@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Brand } from "@/components/ui/brand";
 import { Icon, type IconName } from "@/components/ui/icon";
 
 const services: { label: string; note: string; icon: IconName }[] = [
@@ -7,17 +8,12 @@ const services: { label: string; note: string; icon: IconName }[] = [
   { label: "الفحوصات الدورية", note: "متابعة ووقاية", icon: "stethoscope" },
 ];
 
-function ClinicMark({ compact = false }: { compact?: boolean }) {
+function AyadatakBrand({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className={`${compact ? "size-7" : "size-9"} grid place-items-center rounded-xl bg-primary text-white shadow-sm`}>
-        <Icon name="spark" className={compact ? "size-3.5" : "size-4.5"} />
-      </span>
-      <div>
-        <p className={`${compact ? "text-[8px]" : "text-[11px]"} font-black text-[#08384b]`}>عيادة النور</p>
-        <p className={`${compact ? "text-[5px]" : "text-[7px]"} text-slate-400`}>لرعاية الأسرة</p>
-      </div>
-    </div>
+    <Brand
+      className={`${compact ? "!text-[8px]" : "!text-[10px]"} gap-1 [&>span]:!size-7 [&>span]:!rounded-lg [&>span]:!shadow-none [&>span>svg]:!size-5`}
+      aria-label="عيادتك"
+    />
   );
 }
 
@@ -32,7 +28,7 @@ function DesktopClinicPreview() {
           <span className="mx-auto rounded-full border border-slate-200 bg-white px-8 py-0.5 text-[5px] text-slate-400">alnoor.ayadatak.com</span>
         </div>
         <div className="flex h-12 items-center justify-between border-b border-slate-100 px-4">
-          <ClinicMark />
+          <AyadatakBrand />
           <div className="hidden items-center gap-4 text-[7px] font-bold text-slate-500 min-[470px]:flex lg:hidden">
             <span className="text-primary">الرئيسية</span><span>خدماتنا</span><span>الفريق الطبي</span><span>عن العيادة</span>
           </div>
@@ -81,7 +77,7 @@ function MobileClinicPreview() {
   return (
     <div className="mx-auto w-[178px] overflow-hidden rounded-[28px] border-[6px] border-[#082f40] bg-white shadow-[0_26px_65px_rgba(8,56,75,.24)] sm:w-full sm:max-w-[205px] lg:w-[148px]">
       <div className="mx-auto h-3 w-16 rounded-b-xl bg-[#082f40]" />
-      <div className="flex h-10 items-center justify-between border-b border-slate-100 px-3"><ClinicMark compact /><Icon name="menu" className="size-3.5 text-[#08384b]" /></div>
+      <div className="flex h-10 items-center justify-between border-b border-slate-100 px-3"><AyadatakBrand compact /><Icon name="menu" className="size-3.5 text-[#08384b]" /></div>
       <div className="relative h-[170px] overflow-hidden sm:h-[205px]">
         <Image src="/images/clinic-interior.png" alt="موقع عيادة النور على الهاتف" fill sizes="205px" className="object-cover object-center" loading="eager" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#062f42]/90 via-[#062f42]/20 to-transparent" />
