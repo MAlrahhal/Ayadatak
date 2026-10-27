@@ -4,9 +4,10 @@ import { Brand } from "@/components/ui/brand";
 
 const links = [
   ["الرئيسية", "#top"],
+  ["لوحة الإدارة", "#dashboard"],
   ["المميزات", "#features"],
-  ["القالب", "#templates"],
   ["كيف تعمل", "#how-it-works"],
+  ["نموذج العيادة", "/demo"],
 ] as const;
 
 export function MarketingFooter() {
@@ -18,7 +19,7 @@ export function MarketingFooter() {
             <Link href="#top" className="-m-1 inline-block rounded-lg p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="عيادتك - العودة إلى البداية">
               <Brand />
             </Link>
-            <p className="mt-3 text-xs leading-6 text-[#647d88]">منصة عربية لبناء وإدارة مواقع العيادات، دون تعقيد تقني.</p>
+            <p className="mt-3 text-xs leading-6 text-[#647d88]">مواقع عربية واضحة تساعد العيادات على عرض خدماتها ومعلوماتها.</p>
           </div>
           <nav aria-label="روابط التذييل" className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs font-bold text-[#456371]">
             {links.map(([label, href]) => <Link key={href} href={href} className="inline-flex min-h-11 items-center rounded-md px-1 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{label}</Link>)}
