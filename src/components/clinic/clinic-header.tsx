@@ -1,74 +1,38 @@
-import type { CSSProperties } from "react";
 import type { ClinicIdentity } from "@/types/clinic";
 import { ClinicContainer, clinicFocusClass } from "./clinic-primitives";
-import { getRenderableImage, type ClinicNavigationItem } from "./clinic-utils";
+import { ClinicLogo } from "./clinic-logo";
+import type { ClinicNavigationItem } from "./clinic-utils";
 import type { ClinicEditorSlots } from "./clinic-editor-slots";
 
-export function ClinicHeader({
-  identity,
-  navigation,
-  showContactAction,
-  editor,
-}: {
+export function ClinicHeader({ identity, navigation, showContactAction, editor }: {
   identity: ClinicIdentity;
   navigation: readonly ClinicNavigationItem[];
   showContactAction: boolean;
   editor?: ClinicEditorSlots;
 }) {
-  const logo = getRenderableImage(identity.logo);
-  const logoStyle = logo
-    ? ({ backgroundImage: `url(${JSON.stringify(logo.src)})` } satisfies CSSProperties)
-    : undefined;
-
-  return (
-    <header className="sticky top-0 z-50 border-b border-sky-100 bg-white/95 backdrop-blur">
-      <ClinicContainer className="flex min-h-18 items-center justify-between gap-4 py-3">
-        <div className="flex min-w-0 items-center gap-2">
+  return <header className="relative z-40 border-b border-[var(--clinic-outline)] bg-white">
+    <ClinicContainer className="flex min-h-[78px] items-center justify-between gap-3 py-3">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <a href="#home" className={`flex min-w-0 items-center gap-3 rounded-lg ${clinicFocusClass}`}>
-          <span
-            role={logo ? "img" : undefined}
-            aria-label={logo?.alt}
-            className={`grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--clinic-accent)] text-lg font-black text-[var(--clinic-primary)] ${logo ? "bg-cover bg-center" : ""}`}
-            style={logoStyle}
-          >
-            {logo ? null : <span aria-hidden="true">✚</span>}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-base font-black text-slate-900 sm:text-lg">{identity.nameAr}</span>
-            {identity.tagline ? <span className="block truncate text-xs text-slate-500">{identity.tagline}</span> : null}
-          </span>
+          <ClinicLogo image={identity.logo} className="size-12 sm:size-14" />
+          <span className="min-w-0"><span className="block truncate text-base font-black text-[#102B41] sm:text-lg">{identity.nameAr}</span>{identity.tagline ? <span className="block truncate text-[11px] text-slate-500 sm:text-xs">{identity.tagline}</span> : null}</span>
         </a>
         {editor ? <div className="flex shrink-0 gap-1 [&_button_span]:hidden">{editor.edit("identity")}{editor.edit("logo")}</div> : null}
-        </div>
+      </div>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="التنقل الرئيسي">
-          {navigation.map((item) => (
-            <a key={item.href} href={item.href} className={`rounded-lg px-3 py-2 text-sm font-bold text-slate-600 transition hover:bg-sky-50 hover:text-[var(--clinic-primary)] ${clinicFocusClass}`}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
+      <nav className="hidden items-center gap-0.5 xl:flex" aria-label="التنقل الرئيسي">
+        {navigation.map((item) => <a key={item.href} href={item.href} className={`relative rounded-lg px-2.5 py-3 text-[13px] font-bold transition-colors hover:bg-[var(--clinic-accent)] hover:text-[var(--clinic-primary-text)] ${item.href === "#home" ? "text-[var(--clinic-primary-text)] after:absolute after:inset-x-2 after:bottom-1 after:h-0.5 after:rounded-full after:bg-[var(--clinic-primary)]" : "text-slate-600"} ${clinicFocusClass}`}>{item.label}</a>)}
+      </nav>
 
-        <div className="flex items-center gap-2">
-          {showContactAction ? (
-            <a href="#contact" className={`hidden min-h-11 items-center rounded-xl bg-[var(--clinic-primary)] px-5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 sm:inline-flex ${clinicFocusClass}`}>
-              تواصل معنا
-            </a>
-          ) : null}
-          <details className="relative lg:hidden">
-            <summary className={`grid size-11 cursor-pointer list-none place-items-center rounded-xl border border-sky-200 bg-white text-slate-700 marker:hidden ${clinicFocusClass}`} aria-label="فتح قائمة التنقل">
-              <span aria-hidden="true" className="text-xl leading-none">☰</span>
-            </summary>
-            <nav className="absolute left-0 top-14 w-64 rounded-2xl border border-sky-100 bg-white p-2 shadow-xl" aria-label="التنقل للجوال">
-              {navigation.map((item) => (
-                <a key={item.href} href={item.href} className={`block rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-sky-50 ${clinicFocusClass}`}>
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-          </details>
-        </div>
-      </ClinicContainer>
-    </header>
-  );
+      <div className="flex shrink-0 items-center gap-2">
+        {showContactAction ? <a href="#contact" className={`hidden min-h-11 items-center rounded-xl bg-[var(--clinic-primary)] px-5 text-sm font-bold text-[var(--clinic-on-primary)] shadow-sm transition hover:brightness-110 sm:inline-flex ${clinicFocusClass}`}>تواصل معنا</a> : null}
+        <details className="relative xl:hidden">
+          <summary className={`grid size-11 cursor-pointer list-none place-items-center rounded-xl border border-[var(--clinic-outline)] bg-white text-[#102B41] marker:hidden ${clinicFocusClass}`} aria-label="فتح قائمة التنقل"><span aria-hidden="true" className="text-xl leading-none">☰</span></summary>
+          <nav className="absolute left-0 top-14 z-50 w-[min(270px,calc(100vw-32px))] rounded-2xl border border-[var(--clinic-outline)] bg-white p-2 shadow-xl" aria-label="التنقل للجوال">
+            {navigation.map((item) => <a key={item.href} href={item.href} className={`block rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-[var(--clinic-accent)] hover:text-[var(--clinic-primary-text)] ${clinicFocusClass}`}>{item.label}</a>)}
+          </nav>
+        </details>
+      </div>
+    </ClinicContainer>
+  </header>;
 }

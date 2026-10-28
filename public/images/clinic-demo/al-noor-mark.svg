@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="رمز عيادة النور">
+  <rect width="96" height="96" rx="26" fill="#0B67AD"/>
+  <path d="M48 16c17.7 0 32 14.3 32 32S65.7 80 48 80 16 65.7 16 48 30.3 16 48 16Z" fill="#fff" fill-opacity=".15"/>
+  <path d="M42 28h12v14h14v12H54v14H42V54H28V42h14V28Z" fill="#fff"/>
+</svg>

@@ -12,4 +12,6 @@ export type ClinicEditorSlots = {
   edit: (area: ClinicEditableArea) => ReactNode;
   item: (collection: ClinicCollection, id: string, index: number, length: number) => ReactNode;
   add: (collection: ClinicCollection) => ReactNode;
+  selectedSlideId?: string;
+  onSelectSlide?: (id: string) => void;
 };

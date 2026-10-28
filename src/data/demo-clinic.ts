@@ -1,6 +1,6 @@
 import type { ClinicContent } from "@/types/clinic";
 
-const demoImageBaseUrl = "https://example.com/ayadatak-demo-assets";
+const demoImageBaseUrl = "/images/clinic-demo";
 
 export const demoClinic = {
   identity: {
@@ -9,13 +9,13 @@ export const demoClinic = {
     nameAr: "عيادة النور",
     tagline: "رعاية صحية قريبة من عائلتك",
     about:
-      "عيادة تجريبية توضيحية تعرض شكل المحتوى الذي يمكن لصاحب العيادة إدارته عبر منصة عيادتك. جميع الأسماء وبيانات التواصل الواردة هنا وهمية.",
+      "نقدّم في عيادة النور نموذجًا لرعاية صحية واضحة ومريحة للعائلة، يجمع بين طب الأسرة والأطفال والفحوصات العامة والتغذية العلاجية في مكان واحد. هذا الموقع ومعلوماته مثال توضيحي لعيادة خيالية.",
     logo: {
-      src: `${demoImageBaseUrl}/logo.png`,
+      src: `${demoImageBaseUrl}/al-noor-mark.svg`,
       alt: "شعار تجريبي لعيادة النور",
     },
     brandColors: {
-      primary: "#087F9C",
+      primary: "#0B67AD",
       accent: "#D8F3F7",
     },
   },
@@ -27,22 +27,22 @@ export const demoClinic = {
       {
         id: "hero-reception",
         image: {
-          src: `${demoImageBaseUrl}/clinic-reception.jpg`,
+          src: `${demoImageBaseUrl}/clinic-reception.webp`,
           alt: "صورة توضيحية لاستقبال عيادة حديثة",
         },
       },
       {
         id: "hero-consultation-room",
         image: {
-          src: `${demoImageBaseUrl}/consultation-room.jpg`,
-          alt: "صورة توضيحية لغرفة استشارة طبية",
+          src: `${demoImageBaseUrl}/clinic-corridor.webp`,
+          alt: "صورة توضيحية لممر غرف الاستشارة الطبية",
         },
       },
       {
         id: "hero-care-team",
         image: {
-          src: `${demoImageBaseUrl}/care-team.jpg`,
-          alt: "صورة توضيحية لفريق رعاية صحية",
+          src: `${demoImageBaseUrl}/clinic-exterior.webp`,
+          alt: "صورة توضيحية لمدخل عيادة حديثة",
         },
       },
     ],
@@ -84,10 +84,6 @@ export const demoClinic = {
       specialty: "طب الأسرة",
       biography: "طبيبة تجريبية مهتمة بالرعاية الوقائية والمتابعة الصحية طويلة المدى.",
       yearsOfExperience: 9,
-      image: {
-        src: `${demoImageBaseUrl}/doctor-lina.jpg`,
-        alt: "صورة توضيحية للدكتورة لينا الحداد",
-      },
       displayOrder: 1,
     },
     {
@@ -96,10 +92,6 @@ export const demoClinic = {
       specialty: "طب الأطفال",
       biography: "طبيب تجريبي يقدم متابعة صحية للأطفال وتثقيفًا مبسطًا للعائلات.",
       yearsOfExperience: 7,
-      image: {
-        src: `${demoImageBaseUrl}/doctor-omar.jpg`,
-        alt: "صورة توضيحية للدكتور عمر ناصر",
-      },
       displayOrder: 2,
     },
     {
@@ -108,10 +100,6 @@ export const demoClinic = {
       specialty: "التغذية العلاجية",
       biography: "اختصاصية تجريبية تركز على بناء عادات غذائية عملية ومستدامة.",
       yearsOfExperience: 6,
-      image: {
-        src: `${demoImageBaseUrl}/doctor-rana.jpg`,
-        alt: "صورة توضيحية للدكتورة رنا سالم",
-      },
       displayOrder: 3,
     },
   ],

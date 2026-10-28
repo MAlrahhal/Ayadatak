@@ -1,6 +1,6 @@
 import type { ClinicContent } from "@/types/clinic";
 
-const demoImageBaseUrl = "https://example.com/ayadatak-sakeena-demo-assets";
+const demoImageBaseUrl = "/images/clinic-demo";
 
 export const sakeenaDemoClinic = {
   identity: {
@@ -23,14 +23,14 @@ export const sakeenaDemoClinic = {
       {
         id: "sakeena-hero-room",
         image: {
-          src: `${demoImageBaseUrl}/dental-room.jpg`,
+          src: "/images/clinic-interior.png",
           alt: "صورة توضيحية خيالية لغرفة عناية بالأسنان",
         },
       },
       {
         id: "sakeena-hero-reception",
         image: {
-          src: `${demoImageBaseUrl}/reception.jpg`,
+          src: `${demoImageBaseUrl}/clinic-corridor.webp`,
           alt: "صورة توضيحية خيالية لاستقبال عيادة",
         },
       },

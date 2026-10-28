@@ -63,7 +63,7 @@ Available local routes:
 - `/dashboard-demo?preview=1`: full `ClinicTemplate` preview of the last saved local prototype draft.
 - Invalid, reserved, or unknown `/demo/[slug]` values resolve to not-found.
 
-These are public fictional previews with `noindex` metadata and disabled contact/external actions. The resolver is not production tenant authorization. Demo image URLs use `example.com` placeholders and render intentional fallbacks; the marketing reception image is a separate tracked asset.
+These are public fictional previews with `noindex` metadata and disabled contact/external actions. The resolver is not production tenant authorization. The clinic fixtures now use local illustrative images and graceful fallbacks. The marketing reception asset remains tracked and is reused without changing the marketing homepage.
 
 ## Scripts
 
@@ -74,7 +74,7 @@ These are public fictional previews with `noindex` metadata and disabled contact
 | `npm run start`     | Serve the production build         |
 | `npm run lint`      | Run ESLint                         |
 | `npm run typecheck` | Generate route types and run `tsc` |
-| `npm test`          | Compile and run 18 fixture and prototype tests |
+| `npm test`          | Compile and run 22 fixture and prototype tests |
 
 For the established webpack verification path use `npx next build --webpack` (or `npm run build -- --webpack`). Run typecheck and build sequentially because both manage generated `.next` type files. `next/font` fetches Noto Sans Arabic during a build and can require network access. Run `git diff --check` before handoff. Documentation-only changes normally need documentation validation rather than a production build.
 

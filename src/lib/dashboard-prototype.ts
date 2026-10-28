@@ -1,5 +1,6 @@
 import { demoClinic } from "../data/demo-clinic";
 import type { ClinicContent, ClinicSectionVisibility } from "../types/clinic";
+import { MAX_HERO_SLIDES, MIN_HERO_SLIDES } from "./clinic-hero-slides";
 
 export const PROTOTYPE_STORAGE_KEY = "ayadatak:dashboard-demo:clinic-demo-alnoor:v1";
 const STORAGE_VERSION = 1;
@@ -63,12 +64,33 @@ export function serializePrototype(clinic: ClinicContent): string {
 export function parsePrototype(raw: string): ClinicContent | null {
   try {
     const envelope: unknown = JSON.parse(raw);
-    return isObject(envelope) && envelope.version === STORAGE_VERSION && isClinicPrototype(envelope.clinic) &&
-      validatePrototype(envelope.clinic).length === 0
-      ? envelope.clinic : null;
+    if (!isObject(envelope) || envelope.version !== STORAGE_VERSION || !isClinicPrototype(envelope.clinic)) return null;
+    const clinic = migrateLegacyDemoImages(envelope.clinic);
+    return validatePrototype(clinic).length === 0 ? clinic : null;
   } catch {
     return null;
   }
+}
+
+/** Replace only the original P3.7 placeholder assets; retain all owner-edited fields. */
+function migrateLegacyDemoImages(clinic: ClinicContent): ClinicContent {
+  const next = structuredClone(clinic);
+  const legacy = "https://example.com/ayadatak-demo-assets/";
+  const replacements: Record<string, string> = {
+    "logo.png": "/images/clinic-demo/al-noor-mark.svg",
+    "clinic-reception.jpg": "/images/clinic-demo/clinic-reception.webp",
+    "consultation-room.jpg": "/images/clinic-demo/clinic-corridor.webp",
+    "care-team.jpg": "/images/clinic-demo/clinic-exterior.webp",
+  };
+  if (next.identity.logo?.src === `${legacy}logo.png`) next.identity.logo.src = replacements["logo.png"];
+  next.hero.slides.forEach((slide) => {
+    const file = slide.image.src.startsWith(legacy) ? slide.image.src.slice(legacy.length) : "";
+    if (replacements[file]) slide.image.src = replacements[file];
+  });
+  next.doctors.forEach((doctor) => {
+    if (doctor.image?.src.startsWith(legacy)) doctor.image = undefined;
+  });
+  return next;
 }
 
 export function getSectionPresentation(clinic: ClinicContent, key: keyof ClinicSectionVisibility): "hidden" | "empty" | "visible" {
@@ -106,7 +128,7 @@ const originalImageSources = new Set([
 const validImageUrl = (src: string) => {
   if (!src.trim()) return true;
   if (originalImageSources.has(src)) return true;
-  if (src.startsWith("/") && !src.startsWith("//")) return true;
+  if (src.startsWith("/") && !src.startsWith("//") && !src.includes("..")) return true;
   try {
     const url = new URL(src);
     return (url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password &&
@@ -126,6 +148,10 @@ export function validatePrototype(clinic: ClinicContent): string[] {
   if (!clinic.hero.headline.trim()) errors.push("أدخل عنوان الواجهة الرئيسية.");
   if (!clinic.hero.description.trim()) errors.push("أدخل وصف الواجهة الرئيسية.");
   if (!/^#[0-9a-fA-F]{6}$/.test(clinic.identity.brandColors?.primary ?? "")) errors.push("اختر لونًا رئيسيًا صالحًا.");
+  if (clinic.hero.slides.length < MIN_HERO_SLIDES || clinic.hero.slides.length > MAX_HERO_SLIDES ||
+      new Set(clinic.hero.slides.map((slide) => slide.id)).size !== clinic.hero.slides.length ||
+      clinic.hero.slides.some((slide) => !slide.image.src.trim() || !slide.image.alt.trim()))
+    errors.push("أضف من صورة واحدة إلى خمس صور للواجهة، مع وصف لكل صورة.");
   const images = [clinic.identity.logo, ...clinic.hero.slides.map((slide) => slide.image),
     ...clinic.services.map((item) => item.image), ...clinic.doctors.map((item) => item.image)];
   if (images.some((image) => image && !validImageUrl(image.src))) errors.push("تحقق من روابط الصور؛ استخدم رابط https أو مسارًا محليًا صالحًا.");

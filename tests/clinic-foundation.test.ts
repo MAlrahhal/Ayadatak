@@ -24,6 +24,8 @@ import {
   validatePrototype,
 } from "../src/lib/dashboard-prototype";
 import { addDraftItem, removeDraftItem, setDraftVisibility } from "../src/lib/visual-editor-draft";
+import { addClinicHeroSlide, getAdjacentHeroSlideIndex, moveClinicHeroSlide, removeClinicHeroSlide } from "../src/lib/clinic-hero-slides";
+import { getClinicTheme } from "../src/lib/clinic-theme";
 
 const typedSakeenaDemoClinic: ClinicContent = sakeenaDemoClinic;
 
@@ -243,4 +245,49 @@ test("visual editor reset source remains an independent original fixture copy", 
   const reset = cloneInitialPrototype();
   assert.equal(reset.identity.nameAr, demoClinic.identity.nameAr);
   assert.equal(reset.services.some((item) => item.id === "temporary"), false);
+});
+
+test("hero slider supports one to five images without mutating the source", () => {
+  const original = demoClinic.hero.slides;
+  assert.equal(removeClinicHeroSlide(original, original[0].id).length, 2);
+  const sole = [original[0]];
+  assert.equal(removeClinicHeroSlide(sole, sole[0].id).length, 1);
+  const fourth = addClinicHeroSlide(original, { src: "/images/clinic-demo/clinic-corridor.webp", alt: "ممر عيادة" }, "fourth");
+  const fifth = addClinicHeroSlide(fourth, { src: "/images/clinic-demo/clinic-exterior.webp", alt: "مدخل عيادة" }, "fifth");
+  assert.equal(fifth.length, 5);
+  assert.equal(addClinicHeroSlide(fifth, { src: "/extra.webp", alt: "إضافية" }, "sixth").length, 5);
+  assert.equal(original.length, 3);
+  assert.equal(moveClinicHeroSlide(original, original[1].id, -1)[0].id, original[1].id);
+  assert.equal(original[0].id, "hero-reception");
+});
+
+test("hero slider navigation wraps in RTL and stays still for one image", () => {
+  assert.equal(getAdjacentHeroSlideIndex(0, 3, -1), 2);
+  assert.equal(getAdjacentHeroSlideIndex(2, 3, 1), 0);
+  assert.equal(getAdjacentHeroSlideIndex(0, 1, 1), 0);
+});
+
+test("prototype validates slider count and preserves selected primary color", () => {
+  const draft = cloneInitialPrototype();
+  draft.identity.brandColors = { primary: "#6743A8" };
+  assert.equal(parsePrototype(serializePrototype(draft))?.identity.brandColors?.primary, "#6743A8");
+  assert.equal(getClinicTheme("#6743A8")["--clinic-primary" as keyof ReturnType<typeof getClinicTheme>], "#6743A8");
+  draft.hero.slides = [];
+  assert.ok(validatePrototype(draft).some((message) => message.includes("خمس صور")));
+  draft.hero.slides = Array.from({ length: 6 }, (_, index) => ({ id: String(index), image: { src: "/example.webp", alt: "توضيحية" } }));
+  assert.ok(validatePrototype(draft).some((message) => message.includes("خمس صور")));
+  draft.hero.slides = [{ id: "unsafe", image: { src: "/../outside.webp", alt: "توضيحية" } }];
+  assert.ok(validatePrototype(draft).some((message) => message.includes("روابط الصور")));
+});
+
+test("legacy browser drafts keep edited text while placeholder images migrate", () => {
+  const draft = cloneInitialPrototype();
+  draft.identity.nameAr = "الاسم المحفوظ سابقًا";
+  draft.identity.logo = { src: "https://example.com/ayadatak-demo-assets/logo.png", alt: "شعار" };
+  draft.hero.slides[0].image.src = "https://example.com/ayadatak-demo-assets/clinic-reception.jpg";
+  const restored = parsePrototype(serializePrototype(draft));
+  assert.equal(restored?.identity.nameAr, "الاسم المحفوظ سابقًا");
+  assert.equal(restored?.identity.logo?.src, "/images/clinic-demo/al-noor-mark.svg");
+  assert.equal(restored?.hero.slides[0].image.src, "/images/clinic-demo/clinic-reception.webp");
+  assert.equal(draft.hero.slides[0].image.src, "https://example.com/ayadatak-demo-assets/clinic-reception.jpg");
 });

@@ -1,13 +1,12 @@
 # Ayadatak Task Tracker
 
-Last verified update: **2026-10-27**. Evidence: repository source, package scripts, tests, local Git status/history, and the complete owner-supplied [Implementation Plan v1.1](IMPLEMENTATION_PLAN.md). [ARCHITECTURE.md](ARCHITECTURE.md) describes implemented boundaries.
+Last verified update: **2026-10-28**. Evidence: repository source, package scripts, tests, local Git status/history, and the complete owner-supplied [Implementation Plan v1.1](IMPLEMENTATION_PLAN.md). [ARCHITECTURE.md](ARCHITECTURE.md) describes implemented boundaries.
 
-- Current work: **P3.6 — Dashboard UX/UI Prototype, PENDING REVIEW**. The frontend prototype and scoped verification are complete; owner UX review remains. The P3.5 documentation diff remains uncommitted and is preserved.
+- Current work: **P3.8 — Clinic Website & Visual Editor Design Polish, PENDING REVIEW**. The implementation and local verification are complete; owner visual/product acceptance remains.
 - Active product gate: **P3 final visual/product review — PENDING REVIEW**.
-- Next: owner review of the P3.6 prototype and final P3 template review, then **P4.1 — schema and authorization design**.
+- Next: owner review of P3.8 and final P3 template assets, then **P4.1 — schema and authorization design**.
 - Major blockers/gates: owner template approval; production schema/authorization design; email sign-in details; pilot limits; commercial pricing/gateway (blocks P13, not the free pilot).
-- Git baseline: P3.5 began on clean `main` at HEAD `e42a0b3`; P3 code is recorded in `5a78463`, with marketing revisions through `e42a0b3`. P3.6 began with only the uncommitted P3.5 documentation diff. Neither task committed or pushed.
-- Uncommitted work requiring review: P3.5 documentation (`AGENTS.md`, `README.md`, `docs/PRODUCT_SPEC.md`, and new plan/tracker/architecture/decision documents) plus P3.6 prototype route/components/helper, added tests, and tracker/architecture/README updates. No existing P3 template, resolver, fixture, or marketing source was modified.
+- Git baseline: P3.5/P3.6/P3.7 documentation and editor work was committed and pushed as `a2f035f` on `main`. P3.8 started from that clean commit; the owner subsequently authorized committing and pushing the verified redesign. Product approval remains a separate pending review gate.
 
 Statuses: **DONE**, **IN PROGRESS**, **PENDING REVIEW**, **NOT STARTED**, **BLOCKED**. Passing a build alone does not complete a product phase.
 
@@ -34,16 +33,16 @@ Statuses: **DONE**, **IN PROGRESS**, **PENDING REVIEW**, **NOT STARTED**, **BLOC
 - Completed P3.1: `ClinicContent` types and Al Noor fixture, including optional fields, arrays, visibility, and fixed section order.
 - Completed P3.2: prop-driven `ClinicTemplate`, sections/navigation, image fallbacks, clinic brand-color variables, `/demo` preview safety/noindex.
 - Completed P3.3 foundation: async fixture resolver, normalized/reserved slugs and failure reasons, cloned lookup results, second Sakeena fixture, `/demo/[slug]`, and nine automated foundation test cases.
-- Remaining: final owner visual/product review of the real template on mobile/tablet/desktop; Hero/imagery, doctors, FAQ, optional/hidden/empty states, and image assets. Hero currently renders only the first slide; final slider behavior is open. Fixtures currently use rejected `example.com` image placeholders and fallbacks.
+- Remaining: final owner visual/product review of the real template on mobile/tablet/desktop; P3.8 Hero/imagery, doctors, FAQ, optional/hidden/empty states, and assets require review after implementation.
 - Acceptance: owner accepts the template and assets; scoped technical and visual QA is complete; sections/navigation work for both fixtures and optional states. Existing tests are evidence of foundation coverage, not production security.
 - Git evidence: P3 source is committed; `public/images/clinic-interior.png` is tracked but belongs to marketing, not the fixture image set. No uncommitted P3 work was found at this task's start.
 
 ## P3.5 — Documentation and AI Instructions
 
 - Objective: establish accurate navigation, requirements, architecture, decisions, and progress for future agents.
-- Status: **DONE** for documentation preparation; awaiting owner review of the uncommitted diff.
+- Status: **DONE** for documentation preparation; changes were included in `a2f035f`.
 - Completed: full v1.1 source preserved with a historical-status note; detailed product specification reconciled; README and project-specific AGENTS updated; TASKS/ARCHITECTURE/DECISIONS added. Existing Next.js agent block and CLAUDE delegation preserved.
-- Remaining: owner review; any commit/push requires a new explicit instruction.
+- Remaining: keep documentation synchronized with accepted product and implementation changes.
 - Acceptance: complete source reviewed; approved choices consistently documented; links/Markdown/diff checked; only documentation changed. No application build or test run required for this documentation-only task.
 
 ## P3.6 — Dashboard UX/UI Prototype
@@ -58,11 +57,20 @@ Statuses: **DONE**, **IN PROGRESS**, **PENDING REVIEW**, **NOT STARTED**, **BLOC
 ## P3.7 — Visual Website Editor Prototype
 
 - Objective: edit the real `ClinicTemplate` directly with contextual controls, a focused drawer, explicit browser-local Save, and a saved-draft full-site Preview.
-- Status: **PENDING REVIEW** after frontend implementation and verification; owner UX and final visual acceptance remain.
+- Status: **PENDING REVIEW** after frontend implementation and verification; owner UX and final visual acceptance remain. The work was committed in `a2f035f`.
 - Implemented: `/dashboard-demo` now renders `ClinicTemplate` as the editing canvas. The traditional four-area dashboard UI was removed. Optional editor slots place controls near the clinic identity, Hero, About, collection cards, FAQ, and contact cards. The compact toolbar exposes Save, Preview, section management, and primary-color/approved-image appearance controls.
 - Draft behavior: working edits appear immediately but remain separate from the last saved snapshot. The P3.6 versioned localStorage key and runtime validation are reused. Preview at `/dashboard-demo?preview=1` reads only saved content and passes no editor controls. Hidden sections and navigation links disappear while their content is retained; the section manager can restore them. Item add/edit/delete/reorder is available for services, doctors, testimonials, and FAQ. Reset requires confirmation.
 - Prototype boundary: one fictional fixture and one browser origin only. There is no login, database, upload service, private production preview, subscription, or publish action. P7–P10 and P13 remain **NOT STARTED**.
 - Verification: lint, typecheck, webpack build, Node tests, diff check, and desktop/tablet/mobile browser inspection are required before owner acceptance. Browser inspection includes inline changes, hidden-section recovery, unsaved-preview explanation, and preview control absence.
+
+## P3.8 — Clinic Website & Visual Editor Design Polish
+
+- Objective: bring the shared public `ClinicTemplate` and visual editing layer closer to the owner reference, with a real 1–5-image Hero slider, local illustrative imagery, refined sections, a compact editor toolbar, and approved single-color appearance controls.
+- Status: **PENDING REVIEW** after implementation and local verification; owner visual/product acceptance remains.
+- Implemented direction: one shared clinic template; no marketing redesign, booking, new templates, authentication, production storage, or publishing. The approved fixed section order remains Hero → About → Services → Doctors → Testimonials → FAQ → Location/Contact; quick links within Hero do not reorder content sections.
+- Prototype boundary: local illustrations and browser-local drafts only. Legacy demo image placeholders in saved drafts are migrated in memory without discarding edited text; uploaded image storage remains P9.
+- Verification: lint, typecheck, webpack build, 22 Node tests, and `git diff --check` pass. Browser inspection covered 320/390/820/1024/1440px without horizontal overflow, desktop/tablet/mobile visual composition, image-slider selection/wrap, and unsaved appearance edits. Owner review is still required.
+- Acceptance: slider and appearance controls work on desktop/mobile; no broken image gaps or inaccessible edit controls; saved-draft preview uses the real template without editor UI; both public demo routes remain independent; lint/type/build/tests/diff and responsive visual checks pass. Owner approval is still required before closing P3.
 
 ## P4 — Database Architecture & Integration
 

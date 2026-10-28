@@ -110,7 +110,7 @@ export function getPreviewSafeActionHref(href: string | null, previewMode: boole
 
 export function getRenderableImage(image: ClinicImage | undefined): ClinicImage | null {
   if (!image?.src.trim()) return null;
-  if (image.src.startsWith("/")) return image;
+  if (image.src.startsWith("/") && !image.src.startsWith("//") && !image.src.split("/").includes("..")) return image;
 
   const url = getSafeExternalUrl(image.src);
   if (!url) return null;

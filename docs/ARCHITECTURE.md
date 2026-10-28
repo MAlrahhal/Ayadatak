@@ -1,6 +1,6 @@
 # Ayadatak Architecture
 
-Verified from repository files on 2026-10-27. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) defines approved direction; [TASKS.md](TASKS.md) tracks completion. A requirement below is not an implemented integration unless explicitly identified as current.
+Verified from repository files on 2026-10-28. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) defines approved direction; [TASKS.md](TASKS.md) tracks completion. A requirement below is not an implemented integration unless explicitly identified as current.
 
 ## Current implementation
 
@@ -46,9 +46,9 @@ Current fixture slugs are `demo` and `sakeena-demo`. `/demo` and `/demo/demo` sh
 - Required Hero; fixed optional section sequence: About → Services → Doctors → Testimonials → FAQ → Location/Working Hours/Contact → Footer.
 - Visibility flags and non-empty content determine rendered sections and navigation. Services, doctors, testimonials, and FAQ use `displayOrder`.
 - Both fixtures have empty testimonials. Sakeena also exercises empty/hidden sections, optional details, and multiple working periods.
-- Optional clinic logo/brand colors are supported at presentation level. CSS variables use clinic primary/accent values or defaults. This is not a color-settings UI or validated production theme system; the optional accent field does not approve an additional V1 customization control.
-- The Hero model accepts multiple slides, but the component currently renders only `slides[0]`; no carousel/navigation is implemented.
-- Fixture image URLs point to `example.com`. `getRenderableImage` rejects those demo URLs and unsafe protocols; components show intentional fallback content. The real template does not currently consume the marketing reception image.
+- The template derives a contrast-aware button foreground, dark text shade, light tint, and outline from one primary color through `src/lib/clinic-theme.ts`. The legacy optional `accent` data field remains for compatibility but is not an independent V1 setting.
+- `ClinicHeroSlider` is a small Client Component inside the otherwise server-renderable public template. It supports 1–5 images, RTL previous/next and keyboard arrows, and pagination; one image has no unnecessary controls.
+- Fictional fixtures now use local illustrative clinic images. The original marketing reception asset is reused by Sakeena without modification. `ClinicImageFrame` and `ClinicLogo` handle missing/broken sources with designed fallbacks; external image URLs remain browser-loaded in this prototype.
 - `/demo` routes use `previewMode` and `noindex`/`nofollow` metadata. Contact/map/social actions are disabled; in-page navigation remains available. These previews are public fictional data, not authorized private drafts.
 - Safe-link helpers and fallback rendering are useful UI defenses, not a complete asset-validation or security policy.
 
@@ -62,7 +62,13 @@ The original nine tests cover slug syntax, reserved names, independent fixture r
 
 `src/lib/dashboard-prototype.ts` still owns the P3.6 versioned, namespaced localStorage format, runtime shape checking, validation, visibility summaries, and ordering helpers. Existing valid saved drafts are compatible. `src/lib/visual-editor-draft.ts` provides pure collection/visibility operations. The editor holds separate working and saved copies; changes update the working canvas immediately, while Save alone writes localStorage. A before-unload warning covers navigation away with unsaved changes. Browser storage may be unavailable or cleared. Image URL fields demonstrate the approved logo/clinic-image controls; file upload/storage belongs to P9.
 
-`/dashboard-demo?preview=1` reads the last saved local copy in the same browser origin and renders the full real `ClinicTemplate` with `previewMode`, plus a local-prototype notice and noindex metadata. It has no editor slots or editor controls. When working changes are unsaved, the editor explains that Preview displays only the saved copy and offers a save-first choice. Invalid stored data shows an error instead of rendering arbitrary content. Public `/demo` routes continue to use unchanged fixtures. The current template renders only the first Hero slide, so the appearance editor edits that displayed slide and does not claim a working carousel. This local preview is not a secure private draft preview or production publication.
+`/dashboard-demo?preview=1` reads the last saved local copy in the same browser origin and renders the full real `ClinicTemplate` with `previewMode`, plus a local-prototype notice and noindex metadata. It has no editor slots or editor controls. When working changes are unsaved, the editor explains that Preview displays only the saved copy and offers a save-first choice. Invalid stored data shows an error instead of rendering arbitrary content. Public `/demo` routes continue to use fixture content. This local preview is not a secure private draft preview or production publication.
+
+### P3.8 clinic-site and editor refinement
+
+The public template, editor canvas, and saved-draft preview still share `ClinicTemplate`. P3.8 changes its presentation only: a large image-centered Hero, compact navigation with the clinic logo, quick links to existing sections, a concise image-led About section, tighter service/doctor cards, and clearer contact/hours. The approved fixed content-section order is unchanged. The marketing homepage is not part of this change.
+
+`src/lib/clinic-hero-slides.ts` holds pure 1–5-slide add/remove/move/navigation rules. The editor's Appearance drawer exposes one primary color, a logo reference, and slide thumbnails with add/remove/reorder/select controls; edits update the working canvas immediately, Save persists only the browser-local draft, and Preview reads only saved content. `src/lib/dashboard-prototype.ts` keeps its original storage key/version and selectively migrates only legacy `example.com` demo-image paths while preserving user-edited fields. No production upload, asset authorization, or publication is claimed.
 
 Scripts: `npm run lint`, `npm run typecheck`, `npx next build --webpack`, and `npm test`. Do not run type generation and build concurrently; both write `.next/types`. See [README.md](../README.md) for setup. P3.5 documentation preparation did not rerun application checks; P3.6 and P3.7 ran them after implementation.
 

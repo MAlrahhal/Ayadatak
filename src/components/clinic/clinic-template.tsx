@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
 import type { ClinicTemplateProps } from "@/types/clinic";
+import { getClinicTheme } from "@/lib/clinic-theme";
 import { ClinicContactSection } from "./clinic-contact";
 import { ClinicFooter } from "./clinic-footer";
 import { ClinicHeader } from "./clinic-header";
@@ -17,13 +17,10 @@ export function ClinicTemplate({ clinic, previewMode = false, editor }: ClinicTe
   const navigation = getClinicNavigation(clinic);
   const sections = getRenderableClinicSections(clinic);
   const showContactAction = hasClinicContactSection(clinic);
-  const clinicStyle = {
-    "--clinic-primary": clinic.identity.brandColors?.primary ?? "#087F9C",
-    "--clinic-accent": clinic.identity.brandColors?.accent ?? "#D8F3F7",
-  } as CSSProperties;
+  const clinicStyle = getClinicTheme(clinic.identity.brandColors?.primary);
 
   return (
-    <div className="min-h-screen bg-white text-slate-950" style={clinicStyle}>
+    <div dir="rtl" className="min-h-screen bg-white text-[#102B41]" style={clinicStyle}>
       {previewMode ? (
         <div role="status" className="bg-amber-50 px-4 py-2 text-center text-xs font-bold leading-6 text-amber-900 sm:text-sm">
           معاينة تجريبية خيالية — بيانات التواصل والروابط الخارجية معطّلة.
