@@ -6,12 +6,14 @@ import { ClinicHeader } from "./clinic-header";
 import { ClinicHero } from "./clinic-hero";
 import { ClinicAbout, ClinicDoctors, ClinicFaq, ClinicServices, ClinicTestimonials } from "./clinic-sections";
 import { getClinicNavigation, getRenderableClinicSections, hasClinicContactSection } from "./clinic-utils";
+import type { ClinicEditorSlots } from "./clinic-editor-slots";
 
 type ClinicTemplateViewProps = ClinicTemplateProps & {
   previewMode?: boolean;
+  editor?: ClinicEditorSlots;
 };
 
-export function ClinicTemplate({ clinic, previewMode = false }: ClinicTemplateViewProps) {
+export function ClinicTemplate({ clinic, previewMode = false, editor }: ClinicTemplateViewProps) {
   const navigation = getClinicNavigation(clinic);
   const sections = getRenderableClinicSections(clinic);
   const showContactAction = hasClinicContactSection(clinic);
@@ -27,25 +29,25 @@ export function ClinicTemplate({ clinic, previewMode = false }: ClinicTemplateVi
           معاينة تجريبية خيالية — بيانات التواصل والروابط الخارجية معطّلة.
         </div>
       ) : null}
-      <ClinicHeader identity={clinic.identity} navigation={navigation} showContactAction={showContactAction} />
+      <ClinicHeader identity={clinic.identity} navigation={navigation} showContactAction={showContactAction} editor={editor} />
       <main>
-        <ClinicHero clinic={clinic} showContactAction={showContactAction} />
+        <ClinicHero clinic={clinic} showContactAction={showContactAction} editor={editor} />
         {sections.map((section) => {
           switch (section) {
             case "hero":
               return null;
             case "about":
-              return <ClinicAbout key={section} clinic={clinic} />;
+              return <ClinicAbout key={section} clinic={clinic} editor={editor} />;
             case "services":
-              return <ClinicServices key={section} clinic={clinic} />;
+              return <ClinicServices key={section} clinic={clinic} editor={editor} />;
             case "doctors":
-              return <ClinicDoctors key={section} clinic={clinic} />;
+              return <ClinicDoctors key={section} clinic={clinic} editor={editor} />;
             case "testimonials":
-              return <ClinicTestimonials key={section} clinic={clinic} />;
+              return <ClinicTestimonials key={section} clinic={clinic} editor={editor} />;
             case "faq":
-              return <ClinicFaq key={section} clinic={clinic} />;
+              return <ClinicFaq key={section} clinic={clinic} editor={editor} />;
             case "location-contact":
-              return <ClinicContactSection key={section} clinic={clinic} previewMode={previewMode} />;
+              return <ClinicContactSection key={section} clinic={clinic} previewMode={previewMode || Boolean(editor)} editor={editor} />;
           }
         })}
       </main>

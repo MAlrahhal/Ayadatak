@@ -1,7 +1,8 @@
 import type { ClinicContent } from "@/types/clinic";
 import { ClinicContainer, ClinicImageFrame, clinicFocusClass } from "./clinic-primitives";
+import type { ClinicEditorSlots } from "./clinic-editor-slots";
 
-export function ClinicHero({ clinic, showContactAction }: { clinic: ClinicContent; showContactAction: boolean }) {
+export function ClinicHero({ clinic, showContactAction, editor }: { clinic: ClinicContent; showContactAction: boolean; editor?: ClinicEditorSlots }) {
   const primarySlide = clinic.hero.slides[0];
   const showServicesAction = clinic.sectionVisibility.services && clinic.services.length > 0;
 
@@ -10,6 +11,7 @@ export function ClinicHero({ clinic, showContactAction }: { clinic: ClinicConten
       <div className="pointer-events-none absolute -right-24 top-12 size-72 rounded-full bg-[var(--clinic-accent)] opacity-60 blur-3xl" aria-hidden="true" />
       <ClinicContainer className="relative grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-16">
         <div>
+          {editor ? <div className="mb-3">{editor.edit("hero")}</div> : null}
           {clinic.identity.tagline ? (
             <p className="inline-flex rounded-full border border-sky-200 bg-white px-4 py-2 text-sm font-bold text-[var(--clinic-primary)] shadow-sm">{clinic.identity.tagline}</p>
           ) : null}
@@ -23,6 +25,7 @@ export function ClinicHero({ clinic, showContactAction }: { clinic: ClinicConten
           ) : null}
         </div>
         <div className="relative mx-auto w-full max-w-xl">
+          {editor ? <div className="absolute left-4 top-4 z-10">{editor.edit("heroImage")}</div> : null}
           <div className="absolute -inset-3 rotate-2 rounded-[2rem] bg-[var(--clinic-primary)] opacity-10" aria-hidden="true" />
           <ClinicImageFrame image={primarySlide?.image} fallbackLabel="صورة العيادة" className="aspect-[4/3] rounded-[1.75rem] border-8 border-white shadow-[0_28px_70px_rgba(15,64,84,.18)]" />
           <div className="absolute -bottom-5 right-5 rounded-2xl border border-sky-100 bg-white px-5 py-4 shadow-xl sm:right-8">

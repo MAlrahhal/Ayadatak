@@ -1,8 +1,8 @@
 # Ayadatak (عيادتك) — Product Specification
 
 > [!IMPORTANT]
-> **This is the canonical V1 product specification for Ayadatak.**
-> Product decisions in this document are authoritative until intentionally revised.
+> **This is the detailed V1 product specification for Ayadatak.**
+> Synchronized on 2026-10-27 with the owner-supplied [Master Implementation Plan v1.1](IMPLEMENTATION_PLAN.md), which takes precedence for approved product decisions and the roadmap. Requirements here do not imply implemented functionality; see [TASKS.md](TASKS.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 > Items marked as **future**, **optional**, or **not finalized** must not be silently promoted into V1 requirements.
 > See [§28 Document Status](#28-document-status) for the full rules.
 
@@ -28,14 +28,17 @@ Ayadatak V1 is specifically a **clinic website SaaS**. It is **not** intended to
 
 The initial product focuses on:
 
-- Creating a clinic account.
-- Creating/configuring one clinic.
+- Creating a user account using Google OAuth or email.
+- Creating/configuring clinics, including multiple authorized clinics per user.
 - Managing clinic website content from a dashboard.
 - Publishing a professional public clinic website.
 - Providing a default Ayadatak subdomain.
 - Allowing the clinic owner to control which supported sections appear.
 - Providing one polished clinic website template.
 - Providing basic platform administration.
+- Separating editable draft content from published content.
+- Requiring an explicit first Publish action and later Publish Changes actions.
+- Providing an independent entitlement for each clinic, with a limited free pilot before commercial subscriptions.
 
 > [!WARNING]
 > **Appointment booking is explicitly NOT part of the initial V1.**
@@ -59,9 +62,17 @@ Ayadatak marketing website
 → Receive the clinic's public website
 ```
 
-The clinic owner can return to the dashboard later and update the website.
+The clinic owner can return to the dashboard later, save draft changes, preview them, and explicitly select **Publish Changes**. Saving edits must never update the public website automatically.
 
-Detailed onboarding steps are **not defined yet** beyond this product-level flow.
+Onboarding collects the clinic name, a unique valid non-reserved slug, an initial description, suitable contact information, and an optional logo. Creating a clinic also creates its owner membership and appropriate entitlement consistently. New clinics start unpublished. Full form UX and minimum publishing data remain to be finalized.
+
+### 3.1 Authentication and account access
+
+- Google OAuth and email registration/login are approved.
+- Email/password is the provisional direction; the final email mechanism, recovery, and verification details are decided in P5.
+- Sessions, logout, account recovery, and protected routes require server-side verification.
+- Using multiple sign-in methods must not cause unsafe account linking.
+- An existing user can select and switch between clinics they are authorized to manage.
 
 ---
 
@@ -77,9 +88,11 @@ A clinic website should support the following content.
 
 ### 4.2 Hero
 
-- Hero image slider
-- Approximately 3–5 clinic images
-- Slider navigation controls
+- Multiple clinic images in the content model
+- A Hero image presentation whose final slider behavior requires review
+- Slider navigation controls; final presentation and automatic versus manual operation remain subject to review, and upload limits remain open
+
+The current template renders only the first slide. Supporting multiple image records is not evidence of a working carousel.
 
 ### 4.3 Services
 
@@ -171,7 +184,7 @@ Requirements:
 
 - Disabled sections must **not** leave broken layouts or empty visual gaps.
 - Not every mandatory structural element needs a visibility toggle.
-- Exact visibility rules are **not finalized** and will be defined during implementation.
+- Optional sections must be skipped when disabled or empty, and navigation must match visible sections. Hero remains mandatory. Fine-grained editing and validation rules will be finalized during implementation.
 
 ---
 
@@ -216,6 +229,9 @@ Multi-tenancy is a **core architectural requirement**.
 - Each clinic is logically isolated from other clinics.
 - A clinic user must **never** gain access to another clinic's private dashboard data or management functionality.
 - Tenant isolation must be enforced by **backend/database authorization** and must **not** rely solely on frontend visibility.
+- One user may manage multiple authorized clinics in V1. Each clinic has an independent entitlement; commercial subscriptions are per clinic, not one subscription for the whole account.
+- Draft content is private to authorized members; public reads use published content only, subject to publication, suspension, and entitlement rules.
+- A client-provided clinic ID or slug is not proof of authorization. Verify membership on the server.
 
 The conceptual relationship should allow:
 
@@ -246,7 +262,7 @@ There are two primary product-level roles in V1.
 
 ### 11.1 Clinic User
 
-A clinic owner/user who manages **only** their authorized clinic.
+A clinic owner/user who manages **only** their authorized clinics and can switch between them.
 
 ### 11.2 Platform Admin
 
@@ -270,11 +286,13 @@ V1 admin requirements:
 - View clinic public URL/subdomain.
 - View clinic status.
 - Activate / suspend a clinic.
+- Basic search/filtering, publication and account/entitlement status, reactivation, and free-pilot clinic oversight.
+- Secure assignment and enforcement of platform-admin permissions.
 
 Not in V1:
 
 - Admin impersonation / "login as clinic" is **not implemented in V1**. If impersonation is added later, it must be designed with appropriate security controls and auditability.
-- Advanced analytics, subscription management, maps, sales tools, and similar admin capabilities are **future** functionality.
+- Advanced analytics, full billing administration, maps, sales tools, and similar admin capabilities are **future** functionality. Basic entitlement/pilot status belongs to V1 administration.
 
 ---
 
@@ -327,7 +345,7 @@ Exact validation rules are **not finalized** and will be defined during implemen
 
 ## 15. Custom Domains
 
-Custom domains are part of the product direction but do **not** need to be fully automated in initial V1.
+Custom-domain connection is **deferred to a later phase**, per Implementation Plan v1.1. It is not an initial V1 delivery requirement. The following describes that future direction only.
 
 Example:
 
@@ -337,7 +355,7 @@ alhayatclinic.com → the same Ayadatak clinic tenant
 
 - A custom domain must **not** require a separate application deployment or a separate copy of the clinic website.
 - The shared SaaS application resolves the domain to the correct clinic.
-- Early custom-domain provisioning may be manual.
+- Provisioning may be manual when the future custom-domain phase is approved.
 - If a clinic already owns a domain, it can later be connected through DNS.
 - If Ayadatak provides domain purchasing as a service, it may initially be handled manually.
 - Automated registrar/domain purchasing APIs are **future** functionality.
@@ -349,17 +367,18 @@ alhayatclinic.com → the same Ayadatak clinic tenant
 
 Public clinic websites must be built with SEO and social sharing in mind.
 
-Support should eventually include dynamic, clinic-specific metadata such as:
+V1 production publishing must include clinic-specific metadata such as:
 
 - Page title
 - Description
 - Open Graph metadata
+- Canonical URL and appropriate robots/indexing controls
 - Appropriate clinic branding/logo imagery
 - Search-engine indexability, where appropriate
 
 When a clinic link is shared through services such as WhatsApp or social platforms, the clinic's identity should be represented appropriately rather than using generic Ayadatak metadata.
 
-Exact SEO implementation will be defined during development.
+Demo and unpublished previews must not be indexed. Published-content caches and metadata must refresh after publishing without leaking drafts. Production SEO is planned for P11; current demo metadata is not the production SEO system.
 
 ---
 
@@ -386,6 +405,9 @@ Clinic owners may upload large images from phones or cameras. The product must a
 - Image optimization/compression
 - Reasonable website performance
 - Efficient storage/bandwidth usage
+- Tenant-scoped storage permissions
+- Retaining images referenced by the published version even when removed from a draft
+- Safe cleanup only after no live published content needs an asset
 
 This specification intentionally does **not** prescribe a specific image-compression library. The implementation approach will be selected later.
 
@@ -418,12 +440,14 @@ Current brand direction:
 - Clean
 - Modern
 - Minimal
-- Primary brand direction: **blue and white**
+- Established marketing visual direction: **calm cyan, navy, and white**
+
+V1 clinic customization is limited to the clinic logo, images, and primary brand color, with safe defaults and accessible contrast. Font selection and alternate layouts are outside V1. The current typed model also contains an optional accent color; this does not approve a separate user-facing accent-color control.
 
 **Not finalized:**
 
 - Logo
-- Exact blue shades
+- Final brand shades beyond the established direction
 - Typography
 - Complete design system
 
@@ -435,19 +459,24 @@ Temporary design choices must not be treated as permanent brand decisions.
 
 Ayadatak will have its own public marketing/landing website targeted primarily at **doctors and clinic owners**. Its purpose is to explain the product and convert clinic owners into users.
 
-Expected high-level content may include:
+Approved marketing order:
 
-- Navigation
-- Hero
-- Primary CTA ("ابدأ الآن")
-- Product / clinic-site preview
-- Features
-- Template presentation
-- How it works
-- Final CTA
-- Footer
+1. Header.
+2. Hero: text on the right and the existing Ayadatak brand icon on the left on desktop.
+3. Separate desktop and mobile clinic website previews.
+4. Two dashboard concept previews (not a functioning dashboard).
+5. Features.
+6. Three-step explanation.
+7. Final CTA.
+8. Footer.
 
-Exact copy and visual design are **not finalized**.
+Hero copy:
+
+- Headline: **كل ما يخص عيادتك، في موقع واحد.**
+- Description: **عرّف بعيادتك، اعرض خدماتك، وسهّل على المرضى الوصول إليك.**
+- One primary Hero CTA: **استعرض نموذج العيادة**, currently linking to `/demo`.
+
+The current preview-section title is **موقع يعكس هوية عيادتك**. Marketing device mockups are separate from the actual `ClinicTemplate` and must not be presented as additional templates. Keep marketing content concise: no fabricated statistics or testimonials, unapproved pricing, technical explanations for visitors, or claims that unfinished features are ready.
 
 ---
 
@@ -466,19 +495,21 @@ The clinic dashboard will eventually provide management areas for things such as
 - Location
 - Social links
 - Section visibility
-- Template / design
-- Domain
+- Appearance (logo, images, primary color only in V1)
+- Site settings and clinic selection
 - Account / settings
 
 Billing/plan management can be introduced when the commercial model requires it.
 
 The exact dashboard information architecture is **not finalized** and should be designed incrementally.
 
+The dashboard must distinguish saving a draft from publishing it. Show the active clinic, publication status, public URL, preview action, unpublished-change indicator, and explicit Publish / Publish Changes action. Include useful loading, error, empty, and save states; no fake analytics. Domain management is deferred with custom domains.
+
 ---
 
 ## 23. Business Model
 
-Ayadatak is intended to become a **paid SaaS product**.
+Ayadatak begins with a **limited free pilot**, then commercial subscriptions after market validation and pricing approval. Payment is not required for the free pilot.
 
 Potential monetization includes:
 
@@ -487,7 +518,9 @@ Potential monetization includes:
 - Custom domains
 - Additional features/services
 
-Pricing, plan names, plan limits, trials, and exact packaging are **not finalized**. Speculative pricing must not be encoded into the product.
+Each clinic has its own entitlement. When commercial billing is active, each additional clinic requires a separate subscription; one clinic's expiration must not automatically affect the user's other clinics. During the pilot, authorized clinics receive trial entitlements without collecting payments.
+
+Prices, plan names, payment gateway, pilot duration/limits, expiration policy, and exact packaging remain **open**. Speculative prices must not be encoded or published. Premium templates and custom domains remain future possibilities, not V1 requirements.
 
 ---
 
@@ -556,6 +589,7 @@ Guidance:
 | Database hosting | Supabase PostgreSQL |
 | Authentication   | Supabase Auth       |
 | File storage     | Supabase Storage    |
+| App hosting direction | Railway       |
 | Architecture     | Multi-tenant SaaS   |
 | Version control  | Git / GitHub        |
 
@@ -566,7 +600,7 @@ Current scaffold versions:
 - Tailwind CSS v4
 
 > [!NOTE]
-> Supabase and Prisma have **not** been configured yet.
+> PostgreSQL, Prisma, Supabase Auth/Storage, and Railway deployment have **not** been implemented/configured for Ayadatak. Railway + Supabase is the current planned direction, not a deployed fact. The final database schema and draft/published persistence design belong to P4.1. Prisma does not automatically enforce Supabase RLS when using privileged connections; authorization must be explicitly designed and tested.
 
 ---
 
@@ -590,9 +624,46 @@ Future development should follow these principles:
 
 ## 28. Document Status
 
-**This document is the canonical V1 product specification for Ayadatak (عيادتك).**
+**This document preserves detailed V1 requirements and is synchronized with the approved [Implementation Plan v1.1](IMPLEMENTATION_PLAN.md).**
 
 - Product decisions in this document are **authoritative until intentionally revised**.
 - Items explicitly marked as **future**, **optional**, or **not finalized** must **not** be silently promoted into V1 requirements by an AI agent or developer.
 - Implementation details that are not specified here should be chosen **conservatively and incrementally**.
 - If an implementation task conflicts with this document, the conflict should be **identified before implementation** rather than silently changing the product scope.
+- The implementation plan governs approved product decisions and phase order; this specification adds compatible requirement detail. Report unresolved conflicts instead of silently selecting a version.
+- [ARCHITECTURE.md](ARCHITECTURE.md) records actual versus planned design, [TASKS.md](TASKS.md) records verified progress, and [DECISIONS.md](DECISIONS.md) logs decisions and open questions.
+
+---
+
+## 29. Drafts and Explicit Publishing
+
+The product must distinguish Draft (never published), Published, Unpublished, and Suspended. Unpublished edits may be represented by revisions or a change indicator; exact storage/state details are decided in P4.1.
+
+- Clinic creation and saving content do not publish anything.
+- Draft edits appear in the authorized owner's preview only.
+- First publishing requires preview and an explicit **Publish Website** action.
+- Later edits require an explicit **Publish Changes** action.
+- The server validates authorization, clinic state, entitlement, and required content before publishing.
+- Public reads use a consistent published snapshot/revision or equivalent boundary, never the editable draft.
+- If publishing fails, the previous published version remains intact and the owner can retry.
+- Publishing refreshes public content, metadata, and relevant caches together.
+- Assets referenced by published content remain available while drafts change.
+- A full revision-history/rollback UI is not required in V1.
+
+These are approved requirements; persistence, authorized draft previews, and the publishing system are not yet implemented. The current `/demo` routes display public fictional fixtures, not private user drafts.
+
+---
+
+## 30. Remaining Open Decisions
+
+See Implementation Plan §28 and [DECISIONS.md](DECISIONS.md) for the maintained list:
+
+- Monthly/annual prices, payment gateway, and subscription-expiration policy.
+- Final email sign-in method and recovery/verification details (P5).
+- Pilot duration, limits, and clinic allowance per user.
+- Minimum content required to publish; image/service/doctor limits.
+- Slug changes after publication and handling old links.
+- Automatic versus manual Hero slider behavior.
+- Draft/published storage, transaction, and authorization design (P4.1).
+- Whether to retain a previous published revision for recovery (not required in V1).
+- Future ownership-transfer handling for users with multiple clinics.

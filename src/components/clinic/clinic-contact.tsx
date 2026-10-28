@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ClinicContent } from "@/types/clinic";
 import { ClinicContainer, ClinicSectionHeading, clinicFocusClass } from "./clinic-primitives";
+import type { ClinicEditorSlots } from "./clinic-editor-slots";
 import {
   clinicDayLabels,
   clinicSocialLabels,
@@ -19,7 +20,7 @@ function ContactValue({ href, previewMode, children }: { href: string | null; pr
   return <a href={actionHref} className={`font-bold text-slate-900 underline decoration-sky-200 underline-offset-4 hover:text-[var(--clinic-primary)] ${clinicFocusClass}`}>{children}</a>;
 }
 
-export function ClinicContactSection({ clinic, previewMode }: { clinic: ClinicContent; previewMode: boolean }) {
+export function ClinicContactSection({ clinic, previewMode, editor }: { clinic: ClinicContent; previewMode: boolean; editor?: ClinicEditorSlots }) {
   if (!hasClinicContactSection(clinic)) return null;
 
   const visibility = clinic.sectionVisibility;
@@ -33,6 +34,7 @@ export function ClinicContactSection({ clinic, previewMode }: { clinic: ClinicCo
         <div className="mt-10 grid gap-5 lg:mt-14 lg:grid-cols-3">
           {visibility.location && clinic.location.address.trim() ? (
             <article className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
+              {editor ? <div className="mb-3">{editor.edit("location")}</div> : null}
               <p className="text-sm font-bold text-[var(--clinic-primary)]">الموقع</p>
               <h3 className="mt-3 text-xl font-black text-slate-900">عنوان العيادة</h3>
               <p className="mt-3 leading-8 text-slate-600">{clinic.location.address}</p>
@@ -46,6 +48,7 @@ export function ClinicContactSection({ clinic, previewMode }: { clinic: ClinicCo
 
           {visibility.workingHours && clinic.workingHours.length > 0 ? (
             <article className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm lg:row-span-2">
+              {editor ? <div className="mb-3">{editor.edit("workingHours")}</div> : null}
               <p className="text-sm font-bold text-[var(--clinic-primary)]">ساعات العمل</p>
               <h3 className="mt-3 text-xl font-black text-slate-900">مواعيد استقبال المراجعين</h3>
               <dl className="mt-5 divide-y divide-sky-50">
@@ -65,6 +68,7 @@ export function ClinicContactSection({ clinic, previewMode }: { clinic: ClinicCo
 
           {visibility.contact ? (
             <article className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
+              {editor ? <div className="mb-3">{editor.edit("contact")}</div> : null}
               <p className="text-sm font-bold text-[var(--clinic-primary)]">التواصل</p>
               <h3 className="mt-3 text-xl font-black text-slate-900">تواصلوا معنا</h3>
               <dl className="mt-5 space-y-4 text-sm">
@@ -77,6 +81,7 @@ export function ClinicContactSection({ clinic, previewMode }: { clinic: ClinicCo
 
           {visibility.socialLinks && clinic.socialLinks.length > 0 ? (
             <article className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
+              {editor ? <div className="mb-3">{editor.edit("socialLinks")}</div> : null}
               <p className="text-sm font-bold text-[var(--clinic-primary)]">حسابات العيادة</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {clinic.socialLinks.map((link) => {

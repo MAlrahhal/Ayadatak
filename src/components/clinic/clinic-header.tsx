@@ -2,15 +2,18 @@ import type { CSSProperties } from "react";
 import type { ClinicIdentity } from "@/types/clinic";
 import { ClinicContainer, clinicFocusClass } from "./clinic-primitives";
 import { getRenderableImage, type ClinicNavigationItem } from "./clinic-utils";
+import type { ClinicEditorSlots } from "./clinic-editor-slots";
 
 export function ClinicHeader({
   identity,
   navigation,
   showContactAction,
+  editor,
 }: {
   identity: ClinicIdentity;
   navigation: readonly ClinicNavigationItem[];
   showContactAction: boolean;
+  editor?: ClinicEditorSlots;
 }) {
   const logo = getRenderableImage(identity.logo);
   const logoStyle = logo
@@ -20,6 +23,7 @@ export function ClinicHeader({
   return (
     <header className="sticky top-0 z-50 border-b border-sky-100 bg-white/95 backdrop-blur">
       <ClinicContainer className="flex min-h-18 items-center justify-between gap-4 py-3">
+        <div className="flex min-w-0 items-center gap-2">
         <a href="#home" className={`flex min-w-0 items-center gap-3 rounded-lg ${clinicFocusClass}`}>
           <span
             role={logo ? "img" : undefined}
@@ -34,6 +38,8 @@ export function ClinicHeader({
             {identity.tagline ? <span className="block truncate text-xs text-slate-500">{identity.tagline}</span> : null}
           </span>
         </a>
+        {editor ? <div className="flex shrink-0 gap-1 [&_button_span]:hidden">{editor.edit("identity")}{editor.edit("logo")}</div> : null}
+        </div>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="التنقل الرئيسي">
           {navigation.map((item) => (
