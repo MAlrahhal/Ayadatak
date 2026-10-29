@@ -8,6 +8,7 @@ import {
   getRenderableClinicSections,
 } from "../src/components/clinic/clinic-utils";
 import {
+  RESERVED_CLINIC_SLUGS,
   getFixtureClinicSlugs,
   isReservedClinicSlug,
   normalizeClinicSlug,
@@ -39,11 +40,12 @@ test("normalizes valid slugs and rejects malformed values", () => {
 });
 
 test("reserved clinic slugs are detected after normalization", async () => {
-  assert.equal(isReservedClinicSlug(" ADMIN "), true);
+  for (const slug of RESERVED_CLINIC_SLUGS) {
+    assert.equal(isReservedClinicSlug(` ${slug.toUpperCase()} `), true, slug);
+    assert.deepEqual(await resolveClinicBySlug(slug), { ok: false, slug, reason: "reserved" });
+  }
   assert.equal(isReservedClinicSlug("demo"), false);
-
-  const result = await resolveClinicBySlug("WWW");
-  assert.deepEqual(result, { ok: false, slug: "www", reason: "reserved" });
+  assert.deepEqual(await resolveClinicBySlug("WWW"), { ok: false, slug: "www", reason: "reserved" });
 });
 
 test("resolves both fixture clinics independently", async () => {

@@ -1,0 +1,2 @@
+# Prisma Migrate provider lock. This initial history is PostgreSQL-only.
+provider = "postgresql"

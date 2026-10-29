@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ClinicOperationalState {
+  ACTIVE
+  SUSPENDED
+}
+
+enum ClinicPublicationState {
+  NEVER_PUBLISHED
+  PUBLISHED
+  UNPUBLISHED
+}
+
+enum ClinicRole {
+  OWNER
+  MEMBER
+}
+
+enum EntitlementSource {
+  PILOT
+  COMMERCIAL
+}
+
+enum MediaState {
+  PRIVATE_STAGED
+  PUBLIC_READY
+}
+
+model AppUser {
+  id                String                   @id @default(uuid()) @db.Uuid
+  createdAt         DateTime                 @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime                 @updatedAt @db.Timestamptz(6)
+  identities        AuthIdentity[]
+  memberships       ClinicMembership[]
+  entitlementGrants ClinicEntitlement[]      @relation("EntitlementGrantor")
+  accessExtensions  ClinicEntitlement[]      @relation("ExtensionGrantor")
+  updatedDrafts     ClinicDraft[]            @relation("DraftUpdater")
+  publications      ClinicPublishedContent[] @relation("Publisher")
+  uploads           MediaAsset[]             @relation("Uploader")
+  adminGrant        PlatformAdminGrant?      @relation("AdminSubject")
+  adminGrantsIssued PlatformAdminGrant[]     @relation("AdminGrantor")
+}
+
+model AuthIdentity {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  provider  String
+  subject   String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  user      AppUser  @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, subject])
+  @@index([userId])
+}
+
+model Clinic {
+  id               String                  @id @default(uuid()) @db.Uuid
+  slug             String                  @unique @db.VarChar(63)
+  operationalState ClinicOperationalState  @default(ACTIVE)
+  publicationState ClinicPublicationState  @default(NEVER_PUBLISHED)
+  createdAt        DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime                @updatedAt @db.Timestamptz(6)
+  memberships      ClinicMembership[]
+  entitlement      ClinicEntitlement?
+  draft            ClinicDraft?
+  published        ClinicPublishedContent?
+  media            MediaAsset[]
+}
+
+model ClinicMembership {
+  id        String     @id @default(uuid()) @db.Uuid
+  clinicId  String     @db.Uuid
+  userId    String     @db.Uuid
+  role      ClinicRole
+  createdAt DateTime   @default(now()) @db.Timestamptz(6)
+  clinic    Clinic     @relation(fields: [clinicId], references: [id], onDelete: Restrict)
+  user      AppUser    @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([clinicId, userId])
+  @@index([userId])
+}
+
+model ClinicEntitlement {
+  clinicId             String            @id @db.Uuid
+  source               EntitlementSource
+  startsAt             DateTime          @default(now()) @db.Timestamptz(6)
+  endsAt               DateTime          @db.Timestamptz(6)
+  termVersion          Int               @default(1)
+  accessExtendedUntil  DateTime?         @db.Timestamptz(6)
+  extensionGrantedAt   DateTime?         @db.Timestamptz(6)
+  extensionGrantedById String?           @db.Uuid
+  grantedById          String?           @db.Uuid
+  createdAt            DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime          @updatedAt @db.Timestamptz(6)
+  clinic               Clinic            @relation(fields: [clinicId], references: [id], onDelete: Restrict)
+  grantedBy            AppUser?          @relation("EntitlementGrantor", fields: [grantedById], references: [id], onDelete: Restrict)
+  extensionGrantedBy   AppUser?          @relation("ExtensionGrantor", fields: [extensionGrantedById], references: [id], onDelete: Restrict)
+
+  @@index([endsAt])
+}
+
+model ClinicDraft {
+  clinicId      String   @id @db.Uuid
+  content       Json
+  schemaVersion Int
+  version       Int      @default(1)
+  savedAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedById   String?  @db.Uuid
+  clinic        Clinic   @relation(fields: [clinicId], references: [id], onDelete: Restrict)
+  updatedBy     AppUser? @relation("DraftUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model ClinicPublishedContent {
+  clinicId           String   @id @db.Uuid
+  content            Json
+  schemaVersion      Int
+  sourceDraftVersion Int
+  publicationNumber  Int
+  publishedAt        DateTime @default(now()) @db.Timestamptz(6)
+  publishedById      String?  @db.Uuid
+  clinic             Clinic   @relation(fields: [clinicId], references: [id], onDelete: Restrict)
+  publishedBy        AppUser? @relation("Publisher", fields: [publishedById], references: [id], onDelete: SetNull)
+}
+
+model MediaAsset {
+  id           String     @id @default(uuid()) @db.Uuid
+  clinicId     String     @db.Uuid
+  provider     String
+  bucket       String
+  objectKey    String
+  mimeType     String
+  byteSize     Int
+  state        MediaState @default(PRIVATE_STAGED)
+  uploadedById String?    @db.Uuid
+  createdAt    DateTime   @default(now()) @db.Timestamptz(6)
+  clinic       Clinic     @relation(fields: [clinicId], references: [id], onDelete: Restrict)
+  uploadedBy   AppUser?   @relation("Uploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@unique([provider, bucket, objectKey])
+  @@index([clinicId])
+}
+
+model PlatformAdminGrant {
+  userId      String   @id @db.Uuid
+  grantedAt   DateTime @default(now()) @db.Timestamptz(6)
+  grantedById String?  @db.Uuid
+  user        AppUser  @relation("AdminSubject", fields: [userId], references: [id], onDelete: Restrict)
+  grantedBy   AppUser? @relation("AdminGrantor", fields: [grantedById], references: [id], onDelete: Restrict)
+}

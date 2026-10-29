@@ -7,6 +7,8 @@ const notoSansArabic = Noto_Sans_Arabic({
   subsets: ["arabic", "latin"],
 });
 
+const isProductionSite = process.env.AYADATAK_DEPLOYMENT_ENV === "production";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://ayadatak.com"),
   title: {
@@ -16,12 +18,11 @@ export const metadata: Metadata = {
   description:
     "منصة عربية تساعد العيادات والأطباء على إنشاء وإدارة موقع احترافي للعيادة من مكان واحد.",
   applicationName: "عيادتك",
-  alternates: {
-    canonical: "/",
-  },
+  alternates: isProductionSite ? { canonical: "/" } : undefined,
+  robots: isProductionSite ? undefined : { index: false, follow: false },
   openGraph: {
     type: "website",
-    url: "/",
+    ...(isProductionSite ? { url: "/" } : {}),
     siteName: "عيادتك",
     title: "عيادتك | موقع احترافي لعيادتك",
     description:

@@ -9,5 +9,5 @@
     "rootDir": ".",
     "target": "ES2022"
   },
-  "include": ["tests/clinic-foundation.test.ts"]
+  "include": ["tests/clinic-foundation.test.ts", "tests/clinic-data.test.ts"]
 }

@@ -1,0 +1,21 @@
+# P4.3 final security and schema review
+
+**Date:** 2026-10-29. **Scope:** local schema and dependency review only. No migration, table creation, data write, production change, commit, or deployment.
+
+## Dependency advisories
+
+Before the update, `npm audit` reported two vulnerable packages: `next@16.3.8` (critical aggregate; advisory range `16.0.0–16.4.0`) and transitive `zod@4.6.5` (high; `<4.6.6`, reached through `eslint-plugin-react-hooks` / `zod-validation-error`). The three Next advisories cover [SVG image optimization RCE](https://github.com/advisories/GHSA-2464-fhr4-w9xw), [App Router Server Actions DoS](https://github.com/advisories/GHSA-p3m5-59mp-jv5r), and [`use cache` typed-array RCE](https://github.com/advisories/GHSA-673q-mjm6-r5xr). Their 16.x patched floor is `16.4.1`. [Zod's advisory](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5) identifies `4.6.6` as patched.
+
+Updated `next` and matching `eslint-config-next` to `16.4.1`; pinned a transitive override of `zod` to `4.6.6` rather than adding unused application-level Zod code. `npm ls` confirms those installed versions and final `npm audit --audit-level=low` reports **0 vulnerabilities**. No `npm audit fix --force` was run. An advisory's affected range is not proof that every code path is exploitable in this app; applying the patched version avoids relying on that distinction.
+
+## Schema review and migration boundary
+
+The [nine models](../prisma/schema.prisma) provide PK/FK integrity, unique clinic slug, unique `(provider, subject)` auth identity, unique `(clinicId, userId)` membership, unique media object key, one draft/published/entitlement row per clinic, explicit roles, `timestamptz` instants, and version counters for future compare-and-swap operations. The seven-day grace is derived from `ClinicEntitlement.endsAt`, not a mutable column; admin extension uses `accessExtendedUntil` plus grantor/time. `Clinic.operationalState = SUSPENDED` must override any date. Draft and public content are separate tables. Grantor foreign keys use `Restrict` to preserve privileged-action attribution if user deletion is attempted.
+
+Prisma schema syntax **cannot** enforce the following business invariants by itself. The first reviewed development migration should include SQL `CHECK`/index rules for normalized lowercase slug syntax matching the resolver and reserved names, `endsAt > startsAt`, `termVersion > 0`, positive byte size and version counters, and extension date/actor/time co-presence. Decide whether a publication-state/published-row consistency check is feasible; a cross-table invariant may need a trigger or transactional application workflow. PostgreSQL's unique slug index resolves concurrent creation races; handle uniqueness errors in the server flow.
+
+No database-only constraint makes Prisma's service credential an end-user session. Server code must verify the session, clinic membership/role, media ownership, and platform-admin grant for every private operation; use clinic-scoped writes and test cross-tenant attempts. At-least-one-owner, entitlement-on-onboarding, JSON `ClinicContent` validation, explicit publish permissions, optimistic draft/publication version checks, and atomic publication transaction remain future application work. Public reads must never access `ClinicDraft`; saving a draft must never publish it.
+
+The [Prisma CLI config](../prisma.config.ts) uses the direct URL from ignored `.env.local`; the [server-only client](../src/lib/server/prisma.ts) uses the pooled URL. `npm run db:check` performs only `SELECT 1` on both connections and suppresses driver errors that could include credentials. Schema formatting, validation, and client generation are local and do **not** constitute a database migration.
+
+Final local checks: `prisma format`, `prisma validate`, `prisma generate`, lint, TypeScript, 22 tests, and production webpack build passed. The first build attempt was blocked by sandbox DNS for the existing Google font; an authorized network-enabled retry passed. This does not test tenant authorization or database constraints. **Migration readiness:** schema is suitable for owner review, but the first development migration is not approved or executable yet; review the custom SQL checks, application invariants, and migration plan before running it.

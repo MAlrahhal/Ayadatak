@@ -520,7 +520,7 @@ Potential monetization includes:
 
 Each clinic has its own entitlement. When commercial billing is active, each additional clinic requires a separate subscription; one clinic's expiration must not automatically affect the user's other clinics. During the pilot, authorized clinics receive trial entitlements without collecting payments.
 
-Prices, plan names, payment gateway, pilot duration/limits, expiration policy, and exact packaging remain **open**. Speculative prices must not be encoded or published. Premium templates and custom domains remain future possibilities, not V1 requirements.
+Prices, plan names, payment gateway, pilot duration/limits, and exact packaging remain **open**. The owner approved reminders 7 and 1 days before subscription expiry, exactly 7 days of fully operational public-site grace afterward, then loss of public availability unless renewed or administratively extended. A security/policy suspension overrides grace and extension. Renewal restores the existing published site; expiry never deletes content/media. There is no extra 30-day read-only period or permanent free public tier. See [DATABASE_DESIGN.md](DATABASE_DESIGN.md). Speculative prices must not be encoded or published. Premium templates and custom domains remain future possibilities, not V1 requirements.
 
 ---
 
@@ -576,7 +576,7 @@ Guidance:
 
 ---
 
-## 26. Current Confirmed Technical Direction
+## 26. Current Technical Direction (provisional providers)
 
 | Area             | Choice              |
 | ---------------- | ------------------- |
@@ -586,21 +586,21 @@ Guidance:
 | Styling          | Tailwind CSS        |
 | Database         | PostgreSQL          |
 | ORM              | Prisma ORM          |
-| Database hosting | Supabase PostgreSQL |
-| Authentication   | Supabase Auth       |
-| File storage     | Supabase Storage    |
+| Database hosting | Neon PostgreSQL (preferred provisionally) |
+| Authentication   | Neon Managed Better Auth (candidate) |
+| File storage     | Neon Object Storage (candidate) |
 | App hosting direction | Railway       |
 | Architecture     | Multi-tenant SaaS   |
 | Version control  | Git / GitHub        |
 
 Current scaffold versions:
 
-- Next.js 16.3.8
+- Next.js 16.4.1
 - React 19.2.8
 - Tailwind CSS v4
 
 > [!NOTE]
-> PostgreSQL, Prisma, Supabase Auth/Storage, and Railway deployment have **not** been implemented/configured for Ayadatak. Railway + Supabase is the current planned direction, not a deployed fact. The final database schema and draft/published persistence design belong to P4.1. Prisma does not automatically enforce Supabase RLS when using privileged connections; authorization must be explicitly designed and tested.
+> The owner created a development-only Neon project in P4.2. P4.3 configured Prisma 7.10.1 and validated a local executable schema, but **did not create database tables, migrations, or a persistence layer**. Authentication, object storage, and Railway deployment remain unimplemented. The original v1.1 Supabase recommendation is preserved historically in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) and revised in [DECISIONS.md](DECISIONS.md). The P4.1 [database design](DATABASE_DESIGN.md) has owner approval for its general direction; migration details still need review. Prisma does not automatically enforce end-user/tenant permissions through a service connection. Neon Auth and Object Storage require technical validation before adoption.
 
 ---
 
@@ -637,7 +637,7 @@ Future development should follow these principles:
 
 ## 29. Drafts and Explicit Publishing
 
-The product must distinguish Draft (never published), Published, Unpublished, and Suspended. Unpublished edits may be represented by revisions or a change indicator; exact storage/state details are decided in P4.1.
+The product must distinguish Draft (never published), Published, Unpublished, and Suspended. Unpublished edits may be represented by revisions or a change indicator; P4.1's general direction is owner-approved in [DATABASE_DESIGN.md](DATABASE_DESIGN.md), pending executable schema and implementation.
 
 - Clinic creation and saving content do not publish anything.
 - Draft edits appear in the authorized owner's preview only.
@@ -658,12 +658,12 @@ These are approved requirements; persistence, authorized draft previews, and the
 
 See Implementation Plan §28 and [DECISIONS.md](DECISIONS.md) for the maintained list:
 
-- Monthly/annual prices, payment gateway, and subscription-expiration policy.
+- Monthly/annual prices, payment gateway, and pilot duration; the seven-day expiration/grace rule is approved.
 - Final email sign-in method and recovery/verification details (P5).
 - Pilot duration, limits, and clinic allowance per user.
 - Minimum content required to publish; image/service/doctor limits.
 - Slug changes after publication and handling old links.
 - Automatic versus manual Hero slider behavior.
-- Draft/published storage, transaction, and authorization design (P4.1).
+- Executable draft/published schema, transaction, and authorization implementation (P4.3+); the P4.1 general direction is approved.
 - Whether to retain a previous published revision for recovery (not required in V1).
 - Future ownership-transfer handling for users with multiple clinics.

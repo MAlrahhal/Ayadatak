@@ -137,23 +137,47 @@ Recorded/reconciled **2026-10-27** against the owner-supplied [Implementation Pl
 ### T01 — Railway + Supabase / Prisma
 
 - Date/source: v1.1, 2026-10-27, §§17–19, 24.
-- Choice: current direction is Next.js on Railway; Supabase PostgreSQL/Auth/Storage with Prisma data access; optional Cloudflare DNS; modular monolith.
+- Choice at the time: Next.js on Railway; Supabase PostgreSQL/Auth/Storage with Prisma data access; optional Cloudflare DNS; modular monolith.
 - Reason: source presents this as an initial operational recommendation, not an irrevocable hosting commitment.
-- Impact: P4 designs schema and actual permissions before integration/migrations. Prisma does not automatically enforce RLS through privileged connections. Keep `ClinicTemplate` independent of Prisma.
-- Status: **PLANNED technical direction**, not configured/deployed. No final Prisma schema is approved here.
+- Impact: P4 designs schema and actual permissions before integration/migrations. Prisma does not automatically enforce end-user permissions or RLS through privileged connections. Keep `ClinicTemplate` independent of Prisma.
+- Status: **HISTORICAL/REVISED by T02**; no Supabase integration was configured/deployed. No final Prisma schema was approved here.
+
+### T02 — Cost-driven provisional Neon preference
+
+- Date/source: owner P4.1 brief, 2026-10-28.
+- Choice: retain PostgreSQL + Prisma and planned Railway/Next.js modular monolith; prefer Neon for development database hosting to target $0 additional fixed database/auth/storage subscriptions within free-tier limits. Neon Managed Better Auth and Neon Object Storage are **candidates**, not finalized selections.
+- Reason: minimize fixed cost before revenue without weakening tenant isolation or publication safety. This revises T01's provider recommendation, not the approved V1 product requirements.
+- Impact: [DATABASE_DESIGN.md](DATABASE_DESIGN.md) proposes provider-neutral identity and media boundaries; P4.2/P5/P9 must validate current Neon availability, limits, auth flows, storage behavior, and cost before adoption. The development-only Neon project and P4.3 executable schema exist; the P4.4 initial SQL was applied to that development database only.
+- Status: **P4.1 GENERAL DIRECTION OWNER-APPROVED**; the initial migration was separately approved and applied to development only. Neon Auth/Object Storage remain provisional, and production integrations are not implemented.
+
+### D17 — Seven-day grace, reminders, and administrative extensions
+
+- Date/source: owner P4.1 closure/P4.2 brief, 2026-10-28.
+- Choice: remind at 7 and 1 days before subscription expiry; keep the published public site operational for exactly seven days after expiry; then suspend public availability unless renewed or administratively extended. An authorized platform administrator may extend a specific clinic until a validated future date. Administrative security/policy suspension overrides term, grace, and extension. Renewal restores the existing published site. Never delete content or media automatically on expiry; no extra 30-day read-only period and no permanent free public tier.
+- Reason: give a short, predictable renewal window and controlled support without data loss or an implicit free tier.
+- Impact: derive grace from `endsAt`, store a minimal current extension with actor/time, derive effective access at read time, and later add an idempotent reminder-delivery ledger and admin audit trail. See [DATABASE_DESIGN.md](DATABASE_DESIGN.md).
+- Status: **APPROVED BUSINESS POLICY**, not implemented. Pricing, pilot duration, billing gateway, and publishing permission during grace remain open.
+
+### D18 — Private Super Admin scope
+
+- Date/source: owner P4.1 closure/P4.2 brief, 2026-10-28.
+- Choice: P12 private dashboard for clinic/user/owner/membership and entitlement/publication oversight, suspension/reactivation, manual extensions, pilot grants, meaningful operational health, and authorized owner support. No public admin signup, unrestricted impersonation, or automatic private-draft access.
+- Impact: separate platform-admin authorization and auditable privileged mutations; no P12 UI in P4.2.
+- Status: **APPROVED FUTURE SCOPE**, not implemented.
 
 ## Open questions
 
-All remain open as of the source date; do not silently decide them while implementing another phase.
+The following remain open or require owner review; do not silently decide them while implementing another phase.
 
-- Monthly/annual prices, payment gateway, and subscription-expiration policy (commercial research/P13).
+- Monthly/annual prices, payment gateway, and pilot duration/limits (commercial research/P13); the seven-day grace and reminder timing are now approved.
 - Final email/password versus email-link mechanism, recovery, verification, and safe identity linking (P5).
 - Pilot duration, usage limits, and number of clinics per user (pilot planning).
 - Minimum clinic data needed to publish; allowed image/service/doctor counts (relevant implementation phases).
 - Slug-change policy after publication and handling old URLs (routing design).
 - Automatic versus manual Hero slider behavior (P3 review and subsequent approval).
-- Draft/published storage, membership constraints, transactions and actual data authorization strategy (P4.1).
-- Retaining a previous published revision for recovery, which is not mandatory in V1.
+- P4.1 general direction is approved; exact executable schema, DB checks, role permissions, and transaction implementation remain P4.3+ decisions.
+- Retaining a previous *successful* published revision for one-click rollback; the proposed transaction already preserves the current public document on a **failed** publish.
+- Neon Managed Better Auth/Object Storage suitability and final provider choice after P4.2/P5/P9 validation, including region, email/session behavior, bucket access, limits, and cost.
 - Future ownership-transfer handling when a user manages multiple clinics.
 
 The original approval dates and any rationale not stated by the supplied plan remain unspecified. The master plan is complete and available; no missing source blocks documentation synchronization. Final P3 template visual/product approval remains a separate review gate.

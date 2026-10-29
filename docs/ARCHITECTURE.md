@@ -1,10 +1,10 @@
 # Ayadatak Architecture
 
-Verified from repository files on 2026-10-28. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) defines approved direction; [TASKS.md](TASKS.md) tracks completion. A requirement below is not an implemented integration unless explicitly identified as current.
+Verified from repository files on 2026-10-29. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) defines approved direction; [TASKS.md](TASKS.md) tracks completion. A requirement below is not an implemented integration unless explicitly identified as current.
 
 ## Current implementation
 
-One Next.js App Router application using Next.js 16.3.8, React 19.2.8, strict TypeScript, and Tailwind CSS v4. The root layout supplies Arabic `lang`, RTL direction, Noto Sans Arabic through `next/font/google`, and Ayadatak marketing metadata. Marketing and public fixture routes are server-rendered; the isolated dashboard prototype uses Client Components and browser-local data. There is no authenticated backend or server persistence layer.
+One Next.js App Router application using Next.js 16.4.1, React 19.2.8, strict TypeScript, and Tailwind CSS v4. The root layout supplies Arabic `lang`, RTL direction, Noto Sans Arabic through `next/font/google`, and Ayadatak marketing metadata. Marketing and public fixture routes are server-rendered; the isolated dashboard prototype uses Client Components and browser-local data. An internal persistence layer now exists, but there is no authenticated or HTTP-exposed database integration.
 
 ### Code boundaries
 
@@ -74,9 +74,13 @@ Scripts: `npm run lint`, `npm run typecheck`, `npx next build --webpack`, and `n
 
 ## Planned production architecture
 
-None of the following integrations is implemented yet: Supabase PostgreSQL, Prisma, Supabase Auth, Supabase Storage, Railway deployment, production wildcard routing, functional clinic/admin dashboards, publishing, or commercial billing. There is no final Prisma schema, migration set, database access layer, or membership authorization implementation in this repository.
+P4.3 has a development-only Neon connection, pinned Prisma 7.10.1, an executable nine-entity [schema](../prisma/schema.prisma), direct CLI [config](../prisma.config.ts), pooled server-only [client](../src/lib/server/prisma.ts), and a read-only two-connection check. After owner authorization and a fresh empty-target preflight, P4.4 applied the [initial PostgreSQL migration](../prisma/migrations/20261029000000_initial_schema/migration.sql) to the `ayadatak-dev` **development-only** `neondb/public` database. Read-only verification found the nine app tables, five enums, expected keys/indexes and ten checks; Prisma reports no pending migration. No app data was inserted. The [final P4.3 security review](P4_3_SECURITY_REVIEW.md) records patched Next/Zod advisories. Authentication, object storage, Railway deployment, production wildcard routing, functional clinic/admin dashboards, publishing, and billing remain unimplemented. The P4.4 section of [DATABASE_DESIGN.md](DATABASE_DESIGN.md) records the constraints and remaining invariants.
 
-The direction is a modular monolith: one application with separate presentation, content mapping, data access, authentication, authorization, publishing, storage, tenant resolution, and entitlement responsibilities. Railway would host Next.js; Supabase would supply PostgreSQL/Auth/Storage. DNS/wildcard SSL must be configured and verified before production routing. Cloudflare is an optional DNS direction, not a completed integration.
+P4.5 adds an **internal, unexposed** data-access foundation: pure [content validation](../src/lib/clinic-content-validation.ts) and [entitlement evaluation](../src/lib/clinic-entitlement.ts), a [clinic-scoped service core](../src/lib/clinic-data-core.ts), and a [`server-only` Prisma adapter](../src/lib/server/clinic-data.ts). The runtime adapter denies all actor-protected operations by default because P5 session verification does not exist yet. Isolated tests inject a mock verifier and store; the application has no new HTTP route or Server Action. Owner-only private draft reads/saves, media ownership checks, optimistic version updates and public-row-only reads are implemented as reusable boundaries, but are not a functioning production dashboard or public tenant route. [DATABASE_DESIGN.md §17](DATABASE_DESIGN.md) lists exact limits and remaining P5/P10 work.
+
+P4.6 prepares (but does not perform) a one-service Railway staging deployment. Only the marketing page, fictional clinic demos, and a database-independent `/health` liveness handler are intended to be online. The browser-local `/dashboard-demo` editor and preview now return 404 outside `next dev`; no P4.5 service is exposed through HTTP. The staging/default marketing metadata is noindex/nofollow and omits the production canonical until a separately approved production environment is selected. `npm run build` generates Prisma Client and builds with webpack, without running migrations. No Neon credentials are required for these fixture-only pages; [RAILWAY_STAGING_SETUP.md](RAILWAY_STAGING_SETUP.md) records deployment settings and owner review gates. P5, P9, P10 and P15 remain incomplete.
+
+The direction is a modular monolith: one application with separate presentation, content mapping, data access, authentication, authorization, publishing, storage, tenant resolution, and entitlement responsibilities. Railway remains the planned Next.js host. The owner's cost-driven **provisional** preference is Neon PostgreSQL with Prisma; Neon Managed Better Auth and Neon Object Storage are candidates subject to technical validation, not finalized services. This revises the historical Supabase recommendation without changing approved product behavior. DNS/wildcard SSL must be configured and verified before production routing. Cloudflare is an optional DNS direction, not a completed integration.
 
 ### Approved conceptual data flow
 
@@ -90,15 +94,15 @@ User (Google or email)
   → Public Clinic Website on clinic-slug.ayadatak.com
 ```
 
-One user may manage multiple clinics. Each clinic's entitlement is independent; pilot entitlements enable authorized free usage, while commercial subscriptions are introduced only after pricing approval. This is a conceptual relationship, not a declaration of database tables or a finalized schema.
+One user may manage multiple clinics. Each clinic's entitlement is independent; pilot entitlements enable authorized free usage, while commercial subscriptions are introduced only after pricing approval. The P4.1 proposal uses relational memberships/entitlements plus separate validated JSONB draft and published `ClinicContent` documents. It is not an implemented database or an approved final schema.
 
 ### Authorization and publication boundaries
 
 - Authenticate and verify clinic membership/role on the server for each protected operation. Do not trust a clinic ID supplied by a browser.
 - Scope data access and storage operations to the authorized clinic. Public reads must use only the allowed published version, never the draft.
-- Decide Prisma connection privileges and RLS/application authorization together in P4. Prisma with privileged credentials does not automatically enforce Supabase RLS.
+- Decide Prisma connection privileges and RLS/application authorization together in P4. A Prisma connection does not automatically carry the end user's identity or enforce tenant permissions, regardless of PostgreSQL host.
 - New clinics are unpublished. Saving updates modifies the draft; first publishing and later changes require distinct explicit actions and validation.
-- Choose snapshot/revision storage, transaction semantics, and constraints in P4.1. Failed publishing must preserve the previous public version; never expose partial content.
+- Review the P4.1 proposed single-current-public-document transaction and constraints before implementation. Failed publishing must preserve the previous public version; never expose partial content.
 - Preserve assets still referenced by published content while drafts are edited or images removed. Refresh published caches and metadata after successful publication.
 - Respect unpublished/suspended states and entitlement policy. A fixture slug resolver does none of this.
 - Production owner previews must be authenticated and separate from the public fictional `/demo` routes.
@@ -107,4 +111,4 @@ One user may manage multiple clinics. Each clinic's entitlement is independent; 
 
 P3 needs final owner review of the template, imagery/Hero, doctors, FAQ, section states, and mobile experience. Production color-contrast validation and actual image assets remain to be reviewed. The repository's tracked marketing asset does not resolve the fixture imagery review.
 
-P4.1 must decide the relational schema, memberships, per-clinic entitlements, draft/published persistence and publishing transactions, and authorization strategy before migrations. P5 finalizes email auth/recovery; P9 handles storage/branding; P10 implements publishing and hostname routing; P11 completes production SEO/caching. Custom domains remain deferred. See [DECISIONS.md](DECISIONS.md) for all open product choices.
+P4.1 documents the owner-approved general direction for a relational core, per-clinic entitlements, typed draft/published persistence, publishing transaction, and server authorization strategy in [DATABASE_DESIGN.md](DATABASE_DESIGN.md). The seven-day grace and administrative-extension precedence are approved. The owner created the [P4.2](NEON_DEV_SETUP.md) development project; P4.3 verified both URLs with read-only `SELECT 1` and validated/generated the schema locally. P4.4 applied the initial SQL plus slug, term, extension, positive-counter, JSON-root, and media-size checks to the owner-confirmed development-only target. P4.5 implements reusable validation, entitlement evaluation, and tenant-scoped internal draft/public read logic but **does not activate them through HTTP**. P5 must provide trusted server identity before protected operations can run; P10 still must implement transactional publication, cache invalidation, and tenant routing. Production migration remains separately gated. P9 handles storage/branding and P11 completes production SEO/caching. Custom domains remain deferred. See [DECISIONS.md](DECISIONS.md) for open choices.
